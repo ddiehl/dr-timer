@@ -17,15 +17,9 @@ struct LegEditorView: View {
                 TextField("e.g. Bridge", text: $draft.landmark)
             }
             Section("Time to next landmark") {
-                HStack {
-                    TextField("min", text: $draft.minutes)
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-                    Text("min")
-                    TextField("sec", text: $draft.seconds)
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-                    Text("sec")
+                HStack(spacing: 0) {
+                    wheel(value: $draft.minutes, range: 0...99, unit: "min")
+                    wheel(value: $draft.seconds, range: 0...59, unit: "sec")
                 }
             }
             if let message = draft.errorMessage {
@@ -48,5 +42,22 @@ struct LegEditorView: View {
                 Button("Cancel") { dismiss() }
             }
         }
+    }
+
+    /// Wheel selector over a numeric range, stored in the draft as text.
+    private func wheel(value: Binding<String>, range: ClosedRange<Int>, unit: String) -> some View {
+        let number = Binding<Int>(
+            get: { Int(value.wrappedValue) ?? 0 },
+            set: { value.wrappedValue = String($0) }
+        )
+        return HStack(spacing: 4) {
+            Picker(unit, selection: number) {
+                ForEach(range, id: \.self) { Text(String(format: "%02d", $0)).tag($0) }
+            }
+            .pickerStyle(.wheel)
+            .labelsHidden()
+            Text(unit)
+        }
+        .frame(maxWidth: .infinity)
     }
 }
