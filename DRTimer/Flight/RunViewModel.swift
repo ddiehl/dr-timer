@@ -11,6 +11,7 @@ struct SystemClock: Clock {
 }
 
 protocol AlertControlling {
+    /// Must replace any pending time-up request (implementations use a stable identifier).
     func scheduleTimeUp(at: Date, landmark: String)
     func startRinging()
     func stopRinging()
@@ -53,7 +54,9 @@ final class RunViewModel {
             return nil
         }
         let vm = RunViewModel(run: saved, store: store, clock: clock, alerts: alerts)
-        if case .counting(_, let endsAt) = saved.phase, let leg = saved.currentLeg {
+        // Only a still-counting leg needs a notification; a past end date goes
+        // straight to time-up and rings via refresh().
+        if case .counting(_, let endsAt) = saved.phase, endsAt > clock.now, let leg = saved.currentLeg {
             alerts.scheduleTimeUp(at: endsAt, landmark: leg.landmark)
         }
         vm.refresh()
@@ -72,6 +75,10 @@ final class RunViewModel {
     }
 
     func primaryTapped() {
+        switch run.phase {
+        case .ready, .timeUp: break
+        case .counting, .finished: return
+        }
         run.advance(at: clock.now)
         ringingStarted = false
         alerts.stopRinging()

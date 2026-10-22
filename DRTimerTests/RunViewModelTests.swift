@@ -103,9 +103,13 @@ final class RunViewModelTests: XCTestCase {
         let vm = makeVM()
         vm.primaryTapped()
         clock.advance(20)
-        let restored = RunViewModel.restoreIfAny(store: store, clock: clock, alerts: RecordingAlerts())
+        let a2 = RecordingAlerts()
+        let restored = RunViewModel.restoreIfAny(store: store, clock: clock, alerts: a2)
         XCTAssertNotNil(restored)
         XCTAssertEqual(restored?.remainingSeconds, 40)
+        XCTAssertEqual(a2.scheduled.count, 1)
+        XCTAssertEqual(a2.scheduled.first?.0, Date(timeIntervalSince1970: 1_000_060))
+        XCTAssertEqual(a2.scheduled.first?.1, "Bridge")
         XCTAssertEqual(restored?.run.phase, .counting(leg: 0, endsAt: Date(timeIntervalSince1970: 1_000_060)))
     }
 
@@ -117,12 +121,24 @@ final class RunViewModelTests: XCTestCase {
         let restored = RunViewModel.restoreIfAny(store: store, clock: clock, alerts: a2)
         XCTAssertEqual(restored?.run.phase, .timeUp(leg: 0))
         XCTAssertEqual(a2.count("start"), 1)
+        XCTAssertEqual(a2.count("schedule"), 0)
         restored?.refresh()
         XCTAssertEqual(a2.count("start"), 1)
     }
 
     func testRestoreWithNothingSavedReturnsNil() {
         XCTAssertNil(RunViewModel.restoreIfAny(store: store, clock: clock, alerts: alerts))
+    }
+
+    func testPrimaryTapIgnoredWhileCounting() {
+        let vm = makeVM()
+        vm.primaryTapped()
+        let phase = vm.run.phase
+        alerts.events.removeAll()
+        clock.advance(10)
+        vm.primaryTapped()
+        XCTAssertEqual(vm.run.phase, phase)
+        XCTAssertTrue(alerts.events.isEmpty)
     }
 
     func testEndFlightIgnoredWhileCounting() {

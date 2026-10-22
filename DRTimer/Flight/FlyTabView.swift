@@ -12,6 +12,7 @@ struct FlyTabView: View {
         Group {
             if let viewModel {
                 RunView(viewModel: viewModel, onExit: { self.viewModel = nil })
+                    .toolbar(.hidden, for: .tabBar)
             } else {
                 FlightPickerView { flight in start(flight) }
             }
