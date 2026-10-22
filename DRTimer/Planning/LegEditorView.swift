@@ -27,15 +27,6 @@ struct LegEditorView: View {
             if let message = draft.errorMessage {
                 Section { Text(message).foregroundStyle(.red) }
             }
-            Section {
-                Button("Save leg") {
-                    if let leg = draft.leg {
-                        onSave(leg)
-                        dismiss()
-                    }
-                }
-                .disabled(draft.leg == nil)
-            }
         }
         .onAppear { landmarkFocused = true }
         .navigationTitle("Leg")
@@ -43,6 +34,15 @@ struct LegEditorView: View {
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Save") {
+                    if let leg = draft.leg {
+                        onSave(leg)
+                        dismiss()
+                    }
+                }
+                .disabled(draft.leg == nil)
             }
         }
     }
