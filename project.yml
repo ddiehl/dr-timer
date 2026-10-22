@@ -30,6 +30,10 @@ targets:
           - UIInterfaceOrientationPortrait
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
+        # Lets the app keep running (and start the time-up alert) while a leg
+        # counts down with the phone locked. Local notifications need no plist key.
+        UIBackgroundModes:
+          - audio
   DRTimerTests:
     type: bundle.unit-test
     platform: iOS

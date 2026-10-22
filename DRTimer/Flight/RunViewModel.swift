@@ -18,14 +18,6 @@ protocol AlertControlling {
     func cancelScheduled()
 }
 
-/// Placeholder until the real alert manager replaces it.
-struct NoOpAlerts: AlertControlling {
-    func scheduleTimeUp(at: Date, landmark: String) {}
-    func startRinging() {}
-    func stopRinging() {}
-    func cancelScheduled() {}
-}
-
 @Observable
 final class RunViewModel {
     private(set) var run: FlightRun

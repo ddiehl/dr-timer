@@ -26,17 +26,22 @@ struct TimeUpContent: View {
 
     var body: some View {
         ZStack {
-            Color.red.ignoresSafeArea()
+            FlashingBackground()
             VStack(spacing: 16) {
                 Text("LOOK FOR")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundStyle(.white)
+                    .modifier(LegibleOnFlash())
                 Spacer()
                 Text(landmark)
                     .font(.system(size: 96, weight: .heavy))
                     .minimumScaleFactor(0.1)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.white)
+                    .modifier(LegibleOnFlash())
+                    .padding(12)
+                    // A dark panel keeps contrast steady while the colours swap.
+                    .background(.black.opacity(0.45), in: RoundedRectangle(cornerRadius: 16))
                 Spacer()
                 Button(action: onPrimary) {
                     Text(buttonTitle)
@@ -53,6 +58,16 @@ struct TimeUpContent: View {
             .padding(24)
         }
         .preferredColorScheme(.dark)
+    }
+}
+
+/// White text with a tight dark outline-like shadow, readable on red and on blue.
+private struct LegibleOnFlash: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .shadow(color: .black, radius: 0, x: 2, y: 2)
+            .shadow(color: .black, radius: 0, x: -1, y: -1)
+            .shadow(color: .black.opacity(0.8), radius: 4)
     }
 }
 

@@ -5,6 +5,7 @@ import DRCore
 /// previous launch resumes straight into its phase.
 struct FlyTabView: View {
     @Environment(AppModel.self) private var model
+    let alerts: AlertManager
     @State private var viewModel: RunViewModel?
     @State private var restored = false
 
@@ -20,15 +21,18 @@ struct FlyTabView: View {
         .onAppear {
             guard !restored else { return }
             restored = true
+            // First appearance of the Fly tab: ask for notification permission
+            // (iOS only shows the prompt once; later calls are no-ops).
+            alerts.requestNotificationPermission()
             viewModel = RunViewModel.restoreIfAny(
-                store: model.runStore, clock: SystemClock(), alerts: NoOpAlerts())
+                store: model.runStore, clock: SystemClock(), alerts: alerts)
         }
     }
 
     private func start(_ flight: Flight) {
         guard flight.isValid else { return }
         let vm = RunViewModel(run: FlightRun(flight: flight), store: model.runStore,
-                              clock: SystemClock(), alerts: NoOpAlerts())
+                              clock: SystemClock(), alerts: alerts)
         vm.persistInitial()
         viewModel = vm
     }
