@@ -31,7 +31,7 @@ Simulator tests cannot verify audio, vibration, the silent switch or the locked-
 
 1. AlarmKit (iOS 26) is the only robust fix for the app being force-quit while the silent switch is on.
 2. The device test checklist must be run before relying on the app in flight.
-3. The spec says "iPhone 17 on iOS 17", which is inconsistent (iPhone 17 ships with iOS 26 or later). Confirm the real iOS version on the phone.
+3. The spec says "iPhone 17 on iOS 17", which is likely inconsistent (iPhone 17 ships with iOS 26 or later). Confirm the real iOS version on the phone.
 
 ## Next: Apple Watch
 
@@ -42,3 +42,11 @@ Open items:
 - WatchConnectivity: send flights from the phone to the Watch, and sync run state in both directions.
 
 Already prepared: `DRCore` imports only Foundation, declares a watchOS platform, and `PortabilityTests` pins the JSON keys of a `Flight` (`id`, `name`, `legs`, `landmark`, `seconds`) so the transfer format cannot drift silently.
+
+Not verified: a real watchOS build was not run, because the watchOS platform runtime is not installed on the development machine. `DRCore` was only typechecked against the WatchOS SDK with:
+
+```
+swiftc -typecheck -sdk $(xcrun --sdk watchos --show-sdk-path) -target arm64_32-apple-watchos10.0 DRCore/Sources/DRCore/*.swift
+```
+
+Once the runtime is installed, run `xcodebuild -scheme DRCore -destination 'generic/platform=watchOS' build` from `DRCore/`.
