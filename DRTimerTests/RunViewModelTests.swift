@@ -168,4 +168,60 @@ final class RunViewModelTests: XCTestCase {
         vm.primaryTapped()
         XCTAssertEqual(store.load()?.phase, vm.run.phase)
     }
+
+    func testPauseCancelsAlertAndFreezesTime() {
+        let vm = makeVM()
+        vm.primaryTapped()
+        clock.advance(20)
+        alerts.events.removeAll()
+        vm.pauseTapped()
+        XCTAssertEqual(vm.run.phase, .paused(leg: 0, remaining: 40))
+        XCTAssertEqual(alerts.events, ["cancel"])
+        clock.advance(500)
+        vm.refresh()
+        XCTAssertEqual(vm.remainingSeconds, 40)
+        XCTAssertEqual(alerts.count("start"), 0)
+    }
+
+    func testResumeReschedulesAlertWithRemainingTime() {
+        let vm = makeVM()
+        vm.primaryTapped()
+        clock.advance(20)
+        vm.pauseTapped()
+        clock.advance(100)
+        vm.resumeTapped()
+        XCTAssertEqual(vm.run.phase, .counting(leg: 0, endsAt: clock.now.addingTimeInterval(40)))
+        XCTAssertEqual(alerts.scheduled.last?.0, clock.now.addingTimeInterval(40))
+        XCTAssertEqual(alerts.scheduled.last?.1, "Bridge")
+    }
+
+    func testNextLegStartsNextCountdownAndReschedules() {
+        let vm = makeVM()
+        vm.primaryTapped()
+        clock.advance(10)
+        vm.nextLegTapped()
+        XCTAssertEqual(vm.run.phase, .counting(leg: 1, endsAt: clock.now.addingTimeInterval(30)))
+        XCTAssertEqual(alerts.scheduled.last?.1, "Tower")
+        XCTAssertEqual(vm.remainingSeconds, 30)
+    }
+
+    func testNextLegOnLastLegFinishesAndClears() {
+        let vm = makeVM()
+        vm.primaryTapped()
+        vm.nextLegTapped()
+        vm.nextLegTapped()
+        XCTAssertEqual(vm.run.phase, .finished)
+        XCTAssertNil(store.load())
+    }
+
+    func testPausedRunRestoresPaused() {
+        let vm = makeVM()
+        vm.primaryTapped()
+        clock.advance(20)
+        vm.pauseTapped()
+        clock.advance(1000)
+        let restored = RunViewModel.restoreIfAny(store: store, clock: clock, alerts: alerts)
+        XCTAssertEqual(restored?.run.phase, .paused(leg: 0, remaining: 40))
+        XCTAssertEqual(restored?.remainingSeconds, 40)
+    }
 }

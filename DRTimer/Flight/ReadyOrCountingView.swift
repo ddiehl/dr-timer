@@ -10,6 +10,13 @@ struct ReadyOrCountingView: View {
         return false
     }
 
+    private var isPaused: Bool {
+        if case .paused = viewModel.run.phase { return true }
+        return false
+    }
+
+    private var isLastLeg: Bool { viewModel.run.isLastLeg }
+
     var body: some View {
         let run = viewModel.run
         let legNumber = (run.currentLegIndex ?? 0) + 1
@@ -25,7 +32,7 @@ struct ReadyOrCountingView: View {
                     .font(.system(size: 160, weight: .heavy, design: .monospaced))
                     .minimumScaleFactor(0.3)
                     .lineLimit(1)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(isPaused ? .orange : .white)
                 Text("NEXT: \(run.currentLeg?.landmark ?? "")")
                     .font(.system(size: 30, weight: .bold))
                     .minimumScaleFactor(0.4)
@@ -43,6 +50,23 @@ struct ReadyOrCountingView: View {
                     .tint(.green)
                     .foregroundStyle(.black)
                     EndFlightControl(action: viewModel.endFlightConfirmed)
+                } else {
+                    HStack(spacing: 16) {
+                        Button(action: isPaused ? viewModel.resumeTapped : viewModel.pauseTapped) {
+                            Text(isPaused ? "RESUME" : "PAUSE")
+                                .font(.system(size: 28, weight: .heavy))
+                                .frame(maxWidth: .infinity, minHeight: 80)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(isPaused ? .green : .orange)
+                        Button(action: viewModel.nextLegTapped) {
+                            Text(isLastLeg ? "FINISH" : "NEXT LEG")
+                                .font(.system(size: 28, weight: .heavy))
+                                .frame(maxWidth: .infinity, minHeight: 80)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.blue)
+                    }
                 }
             }
             .padding(24)

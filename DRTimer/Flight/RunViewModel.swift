@@ -69,7 +69,7 @@ final class RunViewModel {
     func primaryTapped() {
         switch run.phase {
         case .ready, .timeUp: break
-        case .counting, .finished: return
+        case .counting, .paused, .finished: return
         }
         run.advance(at: clock.now)
         ringingStarted = false
@@ -79,6 +79,45 @@ final class RunViewModel {
             alerts.scheduleTimeUp(at: endsAt, landmark: leg.landmark)
         }
         save()
+    }
+
+    /// Freezes the countdown and cancels the pending time-up alert.
+    func pauseTapped() {
+        guard case .counting = run.phase else { return }
+        run.pause(at: clock.now)
+        alerts.cancelScheduled()
+        remainingSeconds = run.remaining(at: clock.now)
+        save()
+    }
+
+    /// Continues from the frozen time and re-arms the alert.
+    func resumeTapped() {
+        guard case .paused = run.phase else { return }
+        run.resume(at: clock.now)
+        remainingSeconds = run.remaining(at: clock.now)
+        scheduleCurrentLeg()
+        save()
+    }
+
+    /// Skips the running or paused countdown and starts the next leg now.
+    func nextLegTapped() {
+        switch run.phase {
+        case .counting, .paused: break
+        default: return
+        }
+        run.skipToNextLeg(at: clock.now)
+        ringingStarted = false
+        alerts.stopRinging()
+        alerts.cancelScheduled()
+        remainingSeconds = run.remaining(at: clock.now)
+        scheduleCurrentLeg()
+        save()
+    }
+
+    private func scheduleCurrentLeg() {
+        if case .counting(_, let endsAt) = run.phase, let leg = run.currentLeg {
+            alerts.scheduleTimeUp(at: endsAt, landmark: leg.landmark)
+        }
     }
 
     func endFlightConfirmed() {

@@ -43,7 +43,7 @@ Visual mockups the user approved ("perfect"): high-contrast dark screens, a gree
 
 - Wind, distance or groundspeed calculation.
 - Maps, GPS, position tracking or any navigation logic.
-- In-flight controls beyond START / next / FINISH. No pause, restart, skip or stop. The user explicitly declined these.
+- Restart and stop in flight. (Pause and NEXT LEG were added later at the user's request, 2026-10-22; they show only while a leg is counting or paused.)
 - Any cloud or multi-user features.
 
 ## Anti-goals (a failure even if it technically works)

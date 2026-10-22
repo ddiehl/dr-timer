@@ -3,6 +3,7 @@ import Foundation
 public enum RunPhase: Codable, Equatable, Sendable {
     case ready(leg: Int)
     case counting(leg: Int, endsAt: Date)
+    case paused(leg: Int, remaining: TimeInterval)
     case timeUp(leg: Int)
     case finished
 }
@@ -20,7 +21,7 @@ public struct FlightRun: Codable, Equatable, Sendable {
 
     public var currentLegIndex: Int? {
         switch phase {
-        case .ready(let n), .counting(let n, _), .timeUp(let n): return n
+        case .ready(let n), .counting(let n, _), .paused(let n, _), .timeUp(let n): return n
         case .finished: return nil
         }
     }
@@ -35,11 +36,14 @@ public struct FlightRun: Codable, Equatable, Sendable {
         return i == flight.legs.count - 1
     }
 
-    /// Whole seconds left, rounded up, never negative. Returns 0 in any
-    /// non-counting phase (ready, timeUp, finished).
+    /// Whole seconds left, rounded up, never negative. While paused it is the
+    /// frozen time left; 0 in any other non-counting phase (ready, timeUp, finished).
     public func remaining(at now: Date) -> Int {
-        guard case .counting(_, let endsAt) = phase else { return 0 }
-        return max(0, Int(ceil(endsAt.timeIntervalSince(now))))
+        switch phase {
+        case .counting(_, let endsAt): return max(0, Int(ceil(endsAt.timeIntervalSince(now))))
+        case .paused(_, let left): return max(0, Int(ceil(left)))
+        default: return 0
+        }
     }
 
     public mutating func tick(at now: Date) {
@@ -60,7 +64,34 @@ public struct FlightRun: Codable, Equatable, Sendable {
             } else {
                 phase = .finished
             }
-        case .counting, .finished:
+        case .counting, .paused, .finished:
+            break
+        }
+    }
+
+    /// Freezes the countdown. Only valid while counting.
+    public mutating func pause(at now: Date) {
+        if case .counting(let n, let endsAt) = phase, now < endsAt {
+            phase = .paused(leg: n, remaining: endsAt.timeIntervalSince(now))
+        }
+    }
+
+    /// Continues a paused countdown with the frozen time left.
+    public mutating func resume(at now: Date) {
+        if case .paused(let n, let left) = phase {
+            phase = .counting(leg: n, endsAt: now.addingTimeInterval(left))
+        }
+    }
+
+    /// Abandons the current countdown (counting or paused) and starts the next
+    /// leg now, as if the pilot had reached the landmark early. After the last
+    /// leg the flight finishes.
+    public mutating func skipToNextLeg(at now: Date) {
+        switch phase {
+        case .counting(let n, _), .paused(let n, _):
+            phase = .timeUp(leg: n)
+            advance(at: now)
+        case .ready, .timeUp, .finished:
             break
         }
     }
@@ -68,7 +99,7 @@ public struct FlightRun: Codable, Equatable, Sendable {
     public mutating func endFlight() {
         switch phase {
         case .ready, .timeUp: phase = .finished
-        case .counting, .finished: break
+        case .counting, .paused, .finished: break
         }
     }
 }

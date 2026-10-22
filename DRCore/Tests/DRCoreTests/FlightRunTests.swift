@@ -119,4 +119,55 @@ final class FlightRunTests: XCTestCase {
         XCTAssertEqual(back, r)
         XCTAssertEqual(back.phase, .counting(leg: 0, endsAt: T.addingTimeInterval(750)))
     }
+
+    func testPauseFreezesRemainingAndResumeRestartsFromIt() {
+        var r = makeRun()
+        r.advance(at: T)
+        r.pause(at: T.addingTimeInterval(100))
+        XCTAssertEqual(r.phase, .paused(leg: 0, remaining: 650))
+        XCTAssertEqual(r.remaining(at: T.addingTimeInterval(5000)), 650)
+        r.tick(at: T.addingTimeInterval(5000))
+        XCTAssertEqual(r.phase, .paused(leg: 0, remaining: 650))
+        let t2 = T.addingTimeInterval(200)
+        r.resume(at: t2)
+        XCTAssertEqual(r.phase, .counting(leg: 0, endsAt: t2.addingTimeInterval(650)))
+    }
+
+    func testPauseOnlyWhileCounting() {
+        var r = makeRun()
+        r.pause(at: T)
+        XCTAssertEqual(r.phase, .ready(leg: 0))
+        r.resume(at: T)
+        XCTAssertEqual(r.phase, .ready(leg: 0))
+    }
+
+    func testSkipFromCountingStartsNextLegNow() {
+        var r = makeRun()
+        r.advance(at: T)
+        let t2 = T.addingTimeInterval(60)
+        r.skipToNextLeg(at: t2)
+        XCTAssertEqual(r.phase, .counting(leg: 1, endsAt: t2.addingTimeInterval(300)))
+    }
+
+    func testSkipFromPausedStartsNextLegNow() {
+        var r = makeRun()
+        r.advance(at: T)
+        r.pause(at: T.addingTimeInterval(10))
+        r.skipToNextLeg(at: T.addingTimeInterval(500))
+        XCTAssertEqual(r.phase, .counting(leg: 1, endsAt: T.addingTimeInterval(800)))
+    }
+
+    func testSkipOnLastLegFinishes() {
+        var r = makeRun()
+        r.advance(at: T)
+        r.skipToNextLeg(at: T)
+        r.skipToNextLeg(at: T)
+        XCTAssertEqual(r.phase, .finished)
+    }
+
+    func testSkipIgnoredWhenReady() {
+        var r = makeRun()
+        r.skipToNextLeg(at: T)
+        XCTAssertEqual(r.phase, .ready(leg: 0))
+    }
 }

@@ -10,7 +10,7 @@ struct RunView: View {
     var body: some View {
         Group {
             switch viewModel.run.phase {
-            case .ready, .counting:
+            case .ready, .counting, .paused:
                 ReadyOrCountingView(viewModel: viewModel)
             case .timeUp:
                 TimeUpView(viewModel: viewModel)
