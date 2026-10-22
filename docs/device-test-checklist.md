@@ -96,6 +96,7 @@ or speaker) and the phone vibrates, without unlocking.
 | t | Turn on **Low Power Mode**. Repeat (d) and (g). | Still rings. | |
 | u | Battery: note the battery % at the start of a **1 to 2 h** run (or a ground test with long legs), with the headset connected. | Note the % used per hour: ____ %/h. It must be comfortably affordable for your longest flight. | |
 | v | While a leg counts, **pull down Control Center** (or Notification Center) and leave it open for longer than your Auto-Lock time. | The screen does not dim or lock while Control Center is open. | |
+| w | Walk through the ready, counting, time's-up and finished screens. | No tab bar is visible on any of them. | |
 
 If **(b)** or **(d)** fails, the alert approach must be changed before this app is used
 in flight. The same applies to any failure in (g) to (q). Write down exactly what happened (sound? vibration? notification?

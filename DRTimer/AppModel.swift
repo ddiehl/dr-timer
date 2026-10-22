@@ -17,7 +17,21 @@ final class AppModel {
         do {
             flights = try repository.loadAll()
         } catch {
-            storageError = "Could not load saved flights: \(error.localizedDescription)"
+            storageError = Self.moveUnreadableFileAside(repository.fileURL, reason: error)
+        }
+    }
+
+    /// An unreadable flights file must never be overwritten by the next save:
+    /// rename it to flights.corrupt-<timestamp>.json beside the original.
+    private static func moveUnreadableFileAside(_ url: URL, reason: Error) -> String {
+        let stamp = Int(Date().timeIntervalSince1970 * 1000)
+        let aside = url.deletingLastPathComponent()
+            .appendingPathComponent("\(url.deletingPathExtension().lastPathComponent).corrupt-\(stamp).\(url.pathExtension)")
+        do {
+            try FileManager.default.moveItem(at: url, to: aside)
+            return "Could not load saved flights (\(reason.localizedDescription)). The old data was kept at \(aside.lastPathComponent)."
+        } catch {
+            return "Could not load saved flights (\(reason.localizedDescription)) and could not set the file aside: \(error.localizedDescription)"
         }
     }
 

@@ -6,6 +6,7 @@ struct DRTimerApp: App {
     /// One alert manager for the app's lifetime: it owns the audio session,
     /// the pending notification and the ringing state.
     @State private var alerts = AlertManager.production()
+    @State private var volume = VolumeMonitor.production()
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
@@ -17,6 +18,7 @@ struct DRTimerApp: App {
                     .tabItem { Label("Plan", systemImage: "list.bullet") }
             }
             .environment(model)
+            .environment(volume)
         }
         .onChange(of: scenePhase, initial: true) { _, phase in
             // Keep the screen awake while the app is on screen. `.inactive` (Control

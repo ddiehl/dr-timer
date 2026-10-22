@@ -22,6 +22,12 @@ final class StoreTests: XCTestCase {
         XCTAssertEqual(try repo.loadAll(), [])
     }
 
+    func testLoadAllCorruptFileThrows() throws {
+        let url = dir.appendingPathComponent("flights.json")
+        try Data("not json".utf8).write(to: url)
+        XCTAssertThrowsError(try FlightRepository(fileURL: url).loadAll())
+    }
+
     func testSaveThenLoadAllRoundTrips() throws {
         let url = dir.appendingPathComponent("flights.json")
         let flights = [sampleFlight(), Flight(name: "Other", legs: [Leg(landmark: "C", seconds: 30)])]

@@ -3,12 +3,19 @@ import DRCore
 
 struct FlightPickerView: View {
     @Environment(AppModel.self) private var model
+    @Environment(VolumeMonitor.self) private var volume
     let onStart: (Flight) -> Void
 
     var body: some View {
         NavigationStack {
             List {
-                if model.flights.isEmpty {
+                if volume.isWarningVisible(on: .picker) {
+                    VolumeWarningBanner()
+                        .listRowInsets(EdgeInsets())
+                }
+                if let error = model.storageError {
+                    Text(error).foregroundStyle(.red)
+                } else if model.flights.isEmpty {
                     Text("No flights yet. Plan one in the Plan tab.").foregroundStyle(.secondary)
                 }
                 ForEach(model.flights) { flight in

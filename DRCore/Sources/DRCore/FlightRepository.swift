@@ -3,7 +3,7 @@ import Foundation
 /// Stores the saved flights as one JSON file. Dates use Foundation's default
 /// encoding (Double seconds), which round-trips exactly.
 public final class FlightRepository {
-    private let fileURL: URL
+    public let fileURL: URL
 
     public init(fileURL: URL) {
         self.fileURL = fileURL

@@ -3,6 +3,7 @@ import DRCore
 
 struct ReadyOrCountingView: View {
     let viewModel: RunViewModel
+    @Environment(VolumeMonitor.self) private var volume
 
     private var isReady: Bool {
         if case .ready = viewModel.run.phase { return true }
@@ -32,6 +33,7 @@ struct ReadyOrCountingView: View {
                     .foregroundStyle(.yellow)
                 Spacer()
                 if isReady {
+                    if volume.isWarningVisible(on: .ready) { VolumeWarningBanner() }
                     Button(action: viewModel.primaryTapped) {
                         Text("START")
                             .font(.system(size: 44, weight: .heavy))

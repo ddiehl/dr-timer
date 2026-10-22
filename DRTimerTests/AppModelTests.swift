@@ -60,4 +60,19 @@ final class AppModelTests: XCTestCase {
         model.updateFlight(flight)
         XCTAssertEqual(makeModel().flights.first?.name, "Renamed")
     }
+
+    func testCorruptFlightsFileIsKeptAsideAndNewFlightPersists() throws {
+        let corrupt = Data("{ not valid json".utf8)
+        try corrupt.write(to: dir.appendingPathComponent("flights.json"))
+        let model = makeModel()
+        XCTAssertNotNil(model.storageError)
+        XCTAssertTrue(model.storageError?.contains("flights.corrupt-") ?? false)
+        let flight = sample()
+        model.addFlight(flight)
+        let names = try FileManager.default.contentsOfDirectory(atPath: dir.path)
+        let kept = names.filter { $0.hasPrefix("flights.corrupt-") && $0.hasSuffix(".json") }
+        XCTAssertEqual(kept.count, 1)
+        XCTAssertEqual(try Data(contentsOf: dir.appendingPathComponent(kept[0])), corrupt)
+        XCTAssertEqual(makeModel().flights, [flight])
+    }
 }
