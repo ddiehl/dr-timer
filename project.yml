@@ -22,10 +22,11 @@ targets:
         DEVELOPMENT_TEAM: 675JQKFZ8G
         SWIFT_VERSION: "5.0"
         GENERATE_INFOPLIST_FILE: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     info:
       path: DRTimer/Info.plist
       properties:
-        CFBundleDisplayName: DR Timer
+        CFBundleDisplayName: Dead Reckon Timer
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait

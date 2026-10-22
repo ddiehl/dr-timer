@@ -1,4 +1,4 @@
-# DR Timer
+# Dead Reckon Timer
 
 An iPhone dead-reckoning timer for flying. You plan a flight as a list of legs (a landmark and a time in mm:ss), then fly it: each leg counts down, rings and vibrates when it ends, and you tap to advance to the next leg. Flights and the in-progress run are saved on the device as JSON files.
 
