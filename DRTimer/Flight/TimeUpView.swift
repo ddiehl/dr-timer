@@ -53,10 +53,10 @@ struct TimeUpContent: View {
                 .buttonStyle(.borderedProminent)
                 .tint(.white)
                 .foregroundStyle(.red)
-                EndFlightControl(action: onEnd)
             }
             .padding(24)
         }
+        .overlay(alignment: .topTrailing) { EndFlightControl(action: onEnd) }
         .preferredColorScheme(.dark)
     }
 }

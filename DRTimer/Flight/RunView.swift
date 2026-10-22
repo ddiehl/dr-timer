@@ -47,17 +47,24 @@ struct FinishedView: View {
     }
 }
 
-/// Small, deliberate control: must be pressed and held to end the flight.
+/// Top-right X that ends the flight, after a confirmation so a stray tap can't.
 struct EndFlightControl: View {
     let action: () -> Void
+    @State private var confirming = false
     var body: some View {
-        Text("End flight (hold)")
-            .font(.footnote)
-            .foregroundStyle(.white.opacity(0.6))
-            .padding(10)
-            .contentShape(Rectangle())
-            .onLongPressGesture(minimumDuration: 1.0, perform: action)
-            .accessibilityLabel("End flight")
-            .accessibilityHint("Press and hold to end the flight")
+        Button { confirming = true } label: {
+            Image(systemName: "xmark")
+                .font(.system(size: 22, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 48, height: 48)
+                .background(.black.opacity(0.55), in: Circle())
+                .overlay(Circle().stroke(.white.opacity(0.7), lineWidth: 2))
+        }
+        .padding(16)
+        .accessibilityLabel("End flight")
+        .confirmationDialog("End this flight?", isPresented: $confirming, titleVisibility: .visible) {
+            Button("End flight", role: .destructive, action: action)
+            Button("Keep flying", role: .cancel) {}
+        }
     }
 }

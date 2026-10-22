@@ -49,7 +49,6 @@ struct ReadyOrCountingView: View {
                     .buttonStyle(.borderedProminent)
                     .tint(.green)
                     .foregroundStyle(.black)
-                    EndFlightControl(action: viewModel.endFlightConfirmed)
                 } else {
                     HStack(spacing: 16) {
                         Button(action: isPaused ? viewModel.resumeTapped : viewModel.pauseTapped) {
@@ -70,6 +69,9 @@ struct ReadyOrCountingView: View {
                 }
             }
             .padding(24)
+        }
+        .overlay(alignment: .topTrailing) {
+            if isReady { EndFlightControl(action: viewModel.endFlightConfirmed) }
         }
         .preferredColorScheme(.dark)
     }
