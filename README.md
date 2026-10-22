@@ -14,7 +14,7 @@ xcodegen generate
 
 Then open `DRTimer.xcodeproj`.
 
-Before installing on a real iPhone, set your own bundle identifier (`PRODUCT_BUNDLE_IDENTIFIER`, currently the placeholder `com.example.drtimer`) and your development team (add `DEVELOPMENT_TEAM: <your team id>`) under `targets: DRTimer: settings: base:` in `project.yml`, then run `xcodegen generate` again.
+Before installing on a real iPhone, set your own bundle identifier (`PRODUCT_BUNDLE_IDENTIFIER`, currently `com.spartatechnology.drtimer`) and your development team (`DEVELOPMENT_TEAM` is already set to the author's team; change it to yours) under `targets: DRTimer: settings: base:` in `project.yml`, then run `xcodegen generate` again.
 
 ## Run the tests
 

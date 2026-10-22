@@ -1,6 +1,6 @@
 name: DRTimer
 options:
-  bundleIdPrefix: com.example
+  bundleIdPrefix: com.spartatechnology
   deploymentTarget:
     iOS: "17.0"
 packages:
@@ -18,7 +18,8 @@ targets:
       - package: DRCore
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.example.drtimer
+        PRODUCT_BUNDLE_IDENTIFIER: com.spartatechnology.drtimer
+        DEVELOPMENT_TEAM: 675JQKFZ8G
         SWIFT_VERSION: "5.0"
         GENERATE_INFOPLIST_FILE: YES
     info:
