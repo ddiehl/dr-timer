@@ -1,0 +1,5 @@
+.build/
+*.xcodeproj
+xcuserdata/
+.superpowers/
+DerivedData/
