@@ -4,11 +4,11 @@ import DRCore
 /// Text-field state for the leg editor. `leg` is nil unless the draft is valid.
 struct LegDraft {
     var landmark: String = ""
-    var minutes: String = ""
-    var seconds: String = ""
+    var minutes: String = "0"
+    var seconds: String = "0"
     var id: UUID = UUID()
 
-    init(landmark: String = "", minutes: String = "", seconds: String = "") {
+    init(landmark: String = "", minutes: String = "0", seconds: String = "0") {
         self.landmark = landmark
         self.minutes = minutes
         self.seconds = seconds
@@ -26,7 +26,7 @@ struct LegDraft {
             return "Enter a landmark name."
         }
         if TimeFormat.parse(minutes: minutes, seconds: seconds) == nil {
-            return "Enter minutes and seconds (seconds 0-59) from 00:01 to 99:59."
+            return "Set a leg time greater than 00:00."
         }
         return nil
     }

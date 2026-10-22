@@ -33,4 +33,14 @@ final class LegDraftTests: XCTestCase {
         XCTAssertNil(draft.leg)
         XCTAssertNotNil(draft.errorMessage)
     }
+
+    func testNewDraftDefaultsToZeroTimeSoOnlyOneWheelNeedsSetting() {
+        var draft = LegDraft()
+        XCTAssertEqual(draft.minutes, "0")
+        XCTAssertEqual(draft.seconds, "0")
+        draft.landmark = "Bridge"
+        draft.seconds = "30"
+        XCTAssertEqual(draft.leg?.seconds, 30)
+        XCTAssertNil(draft.errorMessage)
+    }
 }

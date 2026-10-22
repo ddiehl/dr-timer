@@ -4,6 +4,7 @@ import DRCore
 struct LegEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var draft: LegDraft
+    @FocusState private var landmarkFocused: Bool
     private let onSave: (Leg) -> Void
 
     init(draft: LegDraft, onSave: @escaping (Leg) -> Void) {
@@ -15,6 +16,7 @@ struct LegEditorView: View {
         Form {
             Section("Landmark") {
                 TextField("e.g. Bridge", text: $draft.landmark)
+                    .focused($landmarkFocused)
             }
             Section("Time to next landmark") {
                 HStack(spacing: 0) {
@@ -35,6 +37,7 @@ struct LegEditorView: View {
                 .disabled(draft.leg == nil)
             }
         }
+        .onAppear { landmarkFocused = true }
         .navigationTitle("Leg")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
