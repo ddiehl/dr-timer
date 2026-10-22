@@ -1,0 +1,51 @@
+name: DRTimer
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "17.0"
+packages:
+  DRCore:
+    path: DRCore
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+targets:
+  DRTimer:
+    type: application
+    platform: iOS
+    sources: [DRTimer]
+    dependencies:
+      - package: DRCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.drtimer
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: YES
+    info:
+      path: DRTimer/Info.plist
+      properties:
+        CFBundleDisplayName: DR Timer
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+  DRTimerTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [DRTimerTests]
+    dependencies:
+      - target: DRTimer
+      - package: DRCore
+    settings:
+      base:
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  DRTimer:
+    build:
+      targets:
+        DRTimer: all
+        DRTimerTests: [test]
+    test:
+      targets: [DRTimerTests]
