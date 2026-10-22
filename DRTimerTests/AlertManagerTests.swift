@@ -8,6 +8,14 @@ private final class FakeAudio: AudioPlaying {
     var playing: AlertSound?
     func playLoop(_ sound: AlertSound) { calls.append("play:\(sound)"); playing = sound }
     func stop() { calls.append("stop"); playing = nil }
+    /// Simulates a player that silently failed or was paused by the system.
+    var failedSilently = false
+    var ensureCalls = 0
+    var restarts = 0
+    func ensurePlaying() {
+        ensureCalls += 1
+        if failedSilently, playing != nil { restarts += 1; failedSilently = false }
+    }
 }
 
 private final class FakeHaptics: Haptics {
@@ -106,6 +114,30 @@ final class AlertManagerTests: XCTestCase {
         timers.activeRepeating.first?.fire()
         timers.activeRepeating.first?.fire()
         XCTAssertEqual(haptics.pulses, 3)
+    }
+
+    func testEveryHapticTickChecksAudioIsStillPlaying() {
+        manager.startRinging()
+        XCTAssertEqual(audio.ensureCalls, 0)
+        timers.activeRepeating.first?.fire()
+        XCTAssertEqual(audio.ensureCalls, 1)
+        timers.activeRepeating.first?.fire()
+        XCTAssertEqual(audio.ensureCalls, 2)
+    }
+
+    func testWatchdogRestartsAlertThatFailedToPlay() {
+        manager.startRinging()
+        audio.failedSilently = true // e.g. AVAudioPlayer.play() returned false
+        timers.activeRepeating.first?.fire()
+        XCTAssertEqual(audio.restarts, 1, "next pulse restarts the loop")
+        XCTAssertEqual(audio.playing, .alert)
+    }
+
+    func testNoWatchdogAfterStop() {
+        manager.startRinging()
+        manager.stopRinging()
+        timers.repeating.first?.fire()
+        XCTAssertEqual(audio.ensureCalls, 0)
     }
 
     func testStopRingingStopsBoth() {

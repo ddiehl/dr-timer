@@ -19,8 +19,11 @@ struct DRTimerApp: App {
             .environment(model)
         }
         .onChange(of: scenePhase, initial: true) { _, phase in
-            // Keep the screen awake while the app is in use; let it sleep otherwise.
-            UIApplication.shared.isIdleTimerDisabled = (phase == .active)
+            // Keep the screen awake while the app is on screen. `.inactive` (Control
+            // Center or Notification Center pulled down, an incoming-call banner)
+            // still counts: the screen must not lock mid-leg. Only release it
+            // once the app is really in the background.
+            UIApplication.shared.isIdleTimerDisabled = (phase != .background)
         }
     }
 }

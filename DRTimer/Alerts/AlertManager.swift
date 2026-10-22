@@ -18,6 +18,9 @@ protocol AudioPlaying: AnyObject {
     /// Plays `sound` on an endless loop, replacing whatever was playing.
     func playLoop(_ sound: AlertSound)
     func stop()
+    /// Watchdog: if a loop should be playing but is not (failed to start,
+    /// paused by the system), re-activate the session and restart it.
+    func ensurePlaying()
 }
 
 protocol Haptics {
@@ -109,8 +112,12 @@ final class AlertManager: AlertControlling {
         endTimer = nil
         audio.playLoop(.alert)
         haptics.pulse()
+        // The ~1 s tick doubles as a watchdog: if the alert failed to start or
+        // was paused by the system, the next tick restarts it.
         hapticTimer = timers.repeating(every: Self.hapticInterval) { [weak self] in
-            self?.haptics.pulse()
+            guard let self, self.isRinging else { return }
+            self.haptics.pulse()
+            self.audio.ensurePlaying()
         }
     }
 

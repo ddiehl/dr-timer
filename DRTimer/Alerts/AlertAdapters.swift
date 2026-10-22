@@ -25,6 +25,7 @@ final class SessionAudioPlayer: AudioPlaying {
     private let session = AVAudioSession.sharedInstance()
     private var player: AVAudioPlayer?
     private var current: AlertSound?
+    private var sessionActive = false
 
     init() {
         let nc = NotificationCenter.default
@@ -38,16 +39,24 @@ final class SessionAudioPlayer: AudioPlaying {
 
     func playLoop(_ sound: AlertSound) {
         if current == sound, player?.isPlaying == true { return }
-        player?.stop()
-        player = nil
         current = sound
-        start(sound)
+        activateSession(force: false)
+        // Start the new loop before stopping the old one, so there is never a
+        // moment with no audio playing (iOS could suspend a background app then).
+        let old = player
+        player = makePlayer(for: sound)
+        old?.stop()
+    }
+
+    func ensurePlaying() {
+        resumeIfNeeded()
     }
 
     func stop() {
         player?.stop()
         player = nil
         current = nil
+        sessionActive = false
         do {
             try session.setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
@@ -55,23 +64,28 @@ final class SessionAudioPlayer: AudioPlaying {
         }
     }
 
-    private func start(_ sound: AlertSound) {
+    /// One fixed configuration for both sounds, so switching from the silent
+    /// keep-alive to the alert never touches the session at the critical moment.
+    /// `.mixWithOthers`: the keep-alive must not stop the pilot's other audio
+    /// (e.g. ForeFlight), and the alert simply plays on top of it.
+    private func activateSession(force: Bool) {
+        guard force || !sessionActive else { return }
         do {
-            // Keep-alive mixes silently with anything else; the alert ducks other audio.
-            // Both are mixable, so switching from one to the other is allowed while
-            // the app is in the background.
-            let options: AVAudioSession.CategoryOptions = sound == .alert
-                ? [.duckOthers, .allowBluetoothA2DP]
-                : [.mixWithOthers, .allowBluetoothA2DP]
-            try session.setCategory(.playback, mode: .default, options: options)
+            try session.setCategory(.playback, mode: .default, options: [.mixWithOthers, .allowBluetoothA2DP])
             try session.setActive(true)
+            sessionActive = true
         } catch {
+            sessionActive = false
             log.error("Audio session setup failed: \(error.localizedDescription)")
         }
+    }
+
+    /// Returns the player even if play() failed, so the watchdog can retry it.
+    private func makePlayer(for sound: AlertSound) -> AVAudioPlayer? {
         let name = sound == .alert ? "alert" : "silence"
         guard let url = Bundle.main.url(forResource: name, withExtension: "wav") else {
             log.fault("Missing bundled sound \(name).wav")
-            return
+            return nil
         }
         do {
             let p = try AVAudioPlayer(contentsOf: url)
@@ -79,19 +93,24 @@ final class SessionAudioPlayer: AudioPlaying {
             p.volume = 1.0
             p.prepareToPlay()
             if !p.play() { log.error("AVAudioPlayer refused to play \(name).wav") }
-            player = p
+            return p
         } catch {
             log.error("AVAudioPlayer failed for \(name).wav: \(error.localizedDescription)")
+            return nil
         }
     }
 
-    /// Make sure the loop is still going after anything that may have paused it.
+    /// Make sure the loop is still going after anything that may have paused it
+    /// or stopped it from starting. Called by the ~1 s watchdog while ringing and
+    /// on interruption end, route change and media-services reset.
     private func resumeIfNeeded() {
         guard let sound = current else { return }
         if player?.isPlaying == true { return }
-        player?.stop()
-        player = nil
-        start(sound)
+        activateSession(force: true)
+        if let p = player, p.play() { return }
+        let old = player
+        player = makePlayer(for: sound)
+        old?.stop()
     }
 
     @objc private func handleInterruption(_ note: Notification) {
@@ -112,6 +131,7 @@ final class SessionAudioPlayer: AudioPlaying {
     @objc private func handleMediaServicesReset(_ note: Notification) {
         DispatchQueue.main.async {
             self.player = nil
+            self.sessionActive = false
             self.resumeIfNeeded()
         }
     }
