@@ -7,8 +7,7 @@ struct DRTimerApp: App {
     var body: some Scene {
         WindowGroup {
             TabView {
-                Text("Coming in the next task")
-                    .foregroundStyle(.secondary)
+                FlyTabView()
                     .tabItem { Label("Fly", systemImage: "timer") }
                 FlightsListView()
                     .tabItem { Label("Plan", systemImage: "list.bullet") }
