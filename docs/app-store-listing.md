@@ -81,6 +81,24 @@ The app stores flights as JSON on the device and makes no network requests, so
 the privacy nutrition label is **Data Not Collected** on every category.
 
 App Store Connect still requires a privacy policy URL for every app, including
-one that collects nothing. The page is written and ready to host:
-[`privacy-policy.html`](privacy-policy.html). Publish it at
-`spartatechnology.com/privacy` and put that URL in the listing.
+one that collects nothing. The page is [`privacy-policy.html`](privacy-policy.html),
+published at:
+
+```
+https://spartatechnology.com/dr-timer/privacy-policy.html
+```
+
+The served bytes were verified identical to the file in this repo, so republish
+from here whenever the policy changes.
+
+**Outstanding: the certificate on that host does not cover this domain.** It is
+issued for `tempus2.ddns.net` and names only that host, so the `https://` URL
+fails TLS verification and a browser shows a security warning instead of the
+policy — including for the App Store reviewer, who will click it. The same path
+over `http://` serves the page correctly (200, 5164 bytes), and there is no
+HTTP-to-HTTPS redirect.
+
+Fix the certificate before submitting: one covering `spartatechnology.com` and
+`www.spartatechnology.com` resolves it, and the URL above then works as written.
+Submitting the `http://` form meanwhile does work, but is a poor look on a
+privacy page and browsers increasingly warn on plain HTTP.
