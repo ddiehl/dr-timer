@@ -52,3 +52,29 @@ swiftc -typecheck -sdk $(xcrun --sdk watchos --show-sdk-path) -target arm64_32-a
 ```
 
 Once the runtime is installed, run `xcodebuild -scheme DRCore -destination 'generic/platform=watchOS' build` from `DRCore/`.
+
+## Licence
+
+Copyright © 2026 Daniel Diehl.
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version. It is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See [LICENSE](LICENSE) for the full text.
+
+In short: study it, fork it and build on it freely. If you distribute a
+modified version, it has to be under the GPL too, with its source available.
+
+**Not covered by that licence:** the name "Pilot Timer", the app icon and the
+other App Store listing material are not licensed for reuse. Fork the code, but
+ship it under your own name and artwork — and note that Apple rejects apps that
+duplicate one already on the store (App Store Review Guidelines 4.1 and 4.3).
+
+### Building your own copy
+
+`project.yml` carries the author's `DEVELOPMENT_TEAM` and bundle identifier.
+Change both to yours (see [Generate the project](#generate-the-project)) before
+building to a device; a Team ID is not a secret, but it is not yours to sign
+with.
