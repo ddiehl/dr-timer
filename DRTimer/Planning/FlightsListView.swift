@@ -4,6 +4,7 @@ import DRCore
 struct FlightsListView: View {
     @Environment(AppModel.self) private var model
     @State private var newFlight: Flight?
+    @State private var showingAbout = false
 
     var body: some View {
         NavigationStack {
@@ -37,6 +38,12 @@ struct FlightsListView: View {
             }
             .navigationTitle("Flights")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showingAbout = true
+                    } label: { Image(systemName: "info.circle") }
+                    .accessibilityLabel("About")
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         newFlight = Flight(name: "", legs: [])
@@ -46,6 +53,9 @@ struct FlightsListView: View {
             }
             .sheet(item: $newFlight) { flight in
                 NavigationStack { FlightEditorView(flight: flight, isNew: true) }
+            }
+            .sheet(isPresented: $showingAbout) {
+                NavigationStack { AboutView() }
             }
         }
     }
