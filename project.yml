@@ -53,6 +53,19 @@ targets:
       base:
         SWIFT_VERSION: "5.0"
         GENERATE_INFOPLIST_FILE: YES
+  # Drives the app to each screen and captures App Store screenshots. Kept out
+  # of the DRTimer scheme so `xcodebuild test` stays fast; run it with the
+  # Screenshots scheme via scripts/screenshots.sh.
+  DRTimerUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [DRTimerUITests]
+    dependencies:
+      - target: DRTimer
+    settings:
+      base:
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: YES
 schemes:
   DRTimer:
     build:
@@ -61,3 +74,10 @@ schemes:
         DRTimerTests: [test]
     test:
       targets: [DRTimerTests]
+  Screenshots:
+    build:
+      targets:
+        DRTimer: all
+        DRTimerUITests: [test]
+    test:
+      targets: [DRTimerUITests]
