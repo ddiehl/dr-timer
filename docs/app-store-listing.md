@@ -81,6 +81,6 @@ The app stores flights as JSON on the device and makes no network requests, so
 the privacy nutrition label is **Data Not Collected** on every category.
 
 App Store Connect still requires a privacy policy URL for every app, including
-one that collects nothing. Host one at `spartatechnology.com/privacy` — it can
-be a short page stating that the app collects, transmits and stores no personal
-data, and that flights never leave the device.
+one that collects nothing. The page is written and ready to host:
+[`privacy-policy.html`](privacy-policy.html). Publish it at
+`spartatechnology.com/privacy` and put that URL in the listing.
