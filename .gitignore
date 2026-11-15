@@ -5,3 +5,7 @@ xcuserdata/
 DerivedData/
 DRTimer/Info.plist
 build/
+
+# Personal direnv config: selects the gh account for this repo.
+.envrc
+.direnv/
