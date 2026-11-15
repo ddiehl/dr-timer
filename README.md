@@ -1,5 +1,7 @@
 # Pilot Timer
 
+On the App Store as [Pilot Training - Timer](https://apps.apple.com/us/app/pilot-training-timer/id6827411822) — version 1.0, free, iOS 17 or later.
+
 An iPhone dead-reckoning timer for flying. You plan a flight as a list of legs (a landmark and a time in mm:ss), then fly it: each leg counts down, rings and vibrates when it ends, and you tap to advance to the next leg. Flights and the in-progress run are saved on the device as JSON files.
 
 The timing and data model live in `DRCore`, a Foundation-only Swift package that is shared by the iPhone app and (later) the Apple Watch.
